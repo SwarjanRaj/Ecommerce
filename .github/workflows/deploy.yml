@@ -28,8 +28,8 @@ jobs:
         with:
           args: --follow-symlinks --delete  # Removed "--acl public-read" 
         env:
-          AWS_S3_BUCKET: ${{ secrets.BUCKET_NAME }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_BUCKET_NAME }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           SOURCE_DIR: dist
