@@ -48,6 +48,7 @@ const [bestSeller, setBestSeller] = useState([]);
               categoryName: res.categoryName,
               categoryId: res.categoryId,
               products: res.products || [],
+              categorySlug: res.categorySlug,
             });
 
             // console.log(`Pushed Category ${res.categoryName} with ${res.products.length} products`);

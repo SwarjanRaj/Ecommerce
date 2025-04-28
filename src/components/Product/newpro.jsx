@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ProductGallery from "./ProductGallery";
 import { POSTCATACART } from "../../API/cart";
+import { useToast } from "../../helper/ToastMessage";
 
 const ProductSection = ({ product }) => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantityCount, setQuantityCount] = useState(1);
   const token = sessionStorage.getItem("token");
   const isLoggedIn = !!token;
+  const { showSuccess, showError } = useToast();
+
 
   // Handle decrease in quantity
   const handleDecrease = () => {
@@ -53,9 +56,11 @@ const ProductSection = ({ product }) => {
     if (isLoggedIn) {
       try {
         const res = await POSTCATACART([newItem]);
+        showSuccess("Product Added In cart!");
+
         console.log("Item posted to backend cart:", res);
       } catch (err) {
-        console.error("Failed to post to backend cart", err);
+        showError("Faild to add Product!");
       }
     } else {
       // Fallback to localStorage
@@ -102,6 +107,7 @@ const ProductSection = ({ product }) => {
                       </div>
                       <h3 className="name">{product?.productTitle || ""}</h3>
                     </div>
+                   
                     <div className="tf-product-info-desc">
                       <div className="tf-product-info-price">
                         <h5 className="price-on-sale font-2">

@@ -1,16 +1,16 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ToastMessage from "../../helper/ToastMessage";
+import { useToast } from "../../helper/ToastMessage";
 import { POSTCATACART } from "../../API/cart";
 
 
 const formatPrice = (price) => (price ?? 0).toFixed(2);
 
 const CartPage = ({ cart, amount, onIncreaseQuantity, onDecreaseQuantity, onRemoveItem, isLoggedIn }) => {
-  const toastRef = useRef(null);
   const navigate = useNavigate();
   const cartItems = cart || [];
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   console.log(cartItems);
 
@@ -19,12 +19,12 @@ const CartPage = ({ cart, amount, onIncreaseQuantity, onDecreaseQuantity, onRemo
   let total = 0;
 
   if (!isLoggedIn) {
-    subtotal = cartItems.reduce((acc, item) => acc + item.pricing.finalPrice * item.quantity, 0);
+    total = cartItems.reduce((acc, item) => acc + item.pricing.finalPrice * item.quantity, 0);
     discount = cartItems.reduce(
       (acc, item) => acc + (item.pricing.baseRate - item.pricing.netPrice) * item.quantity,
       0
     );
-    total = subtotal + discount;
+    subtotal = total + discount;
   } else if (amount) {
     subtotal = (amount.cartTotal ?? 0) + (amount.discountTotal ?? 0);
     discount = amount.discountTotal ?? 0;
@@ -39,34 +39,34 @@ const CartPage = ({ cart, amount, onIncreaseQuantity, onDecreaseQuantity, onRemo
     e.preventDefault();
 
     if (cartItems.length < 1) {
-      toastRef.current?.showError("Cart is empty");
+      showError("Cart is empty");
       return;
     }
 
     if (!agreeTerms) {
-      toastRef.current?.showError("Please agree to the terms and conditions before proceeding.");
+      showError("Please agree to the terms and conditions before proceeding.");
       return;
     }
 
     if (!isLoggedIn) {
       try {
         localStorage.setItem("postLoginRedirect", "/checkout");
+        showError("Please Login");
         navigate("/login");
       } catch (err) {
-        toastRef.current?.showError("Failed to redirect. Please try again.");
+        showError("Failed to redirect. Please try again.");
       }
     } else {
       try {
         navigate("/checkout");
       } catch (err) {
-        toastRef.current?.showError("Failed to proceed to checkout.");
+        showError("Failed to proceed to checkout.");
       }
     }
   };
 
   return (
     <section className="flat-spacing">
-      <ToastMessage ref={toastRef} />
 
       <div className="container">
         <div className="row">

@@ -55,6 +55,7 @@ const Home = () => {
       let displayIndex = 0;
 
       return productswithcategory.map((cat) => {
+        console.log(cat)
         if (!cat.products || cat.products.length === 0) return null;
 
         const bgClass = displayIndex % 2 !== 0 ? "bg-light" : "";

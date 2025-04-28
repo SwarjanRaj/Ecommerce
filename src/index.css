@@ -528,3 +528,10 @@
 .bolder {
   font-weight: 600;
 }
+
+@media (max-width: 720px) {
+  .preload-wrapper {
+    overflow: unset !important;
+    padding-right: 0 !important;
+  }
+}
