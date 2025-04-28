@@ -110,7 +110,7 @@ const BestSeller = ({ title, bg, slug, products = [], loading }) => {
                         </Link>
                       </div>
                       <div className="list-btn-main">
-                        <button className="btn-main-product">Add To Cart</button>
+                        <Link to={`/product/${product.slug}`} className="btn-main-product">Add To Cart</Link>
                       </div>
                     </div>
                     <div className="card-product-info">

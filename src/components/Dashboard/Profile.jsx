@@ -13,13 +13,23 @@ const statesWithDistricts = {
   TamilNadu: ["Chennai", "Madurai", "Coimbatore", "Salem", "Tirunelveli"],
 };
 
-const LocationSelector = ({ selectedState, setSelectedState }) => {
+const LocationSelector = ({ selectedState, setSelectedState, selectedDistrict, setSelectedDistrict }) => {
   const [districts, setDistricts] = useState([]);
+
+  useEffect(() => {
+    if (selectedState) {
+      setDistricts(statesWithDistricts[selectedState] || []);
+    }
+  }, [selectedState]);
 
   const handleStateChange = (e) => {
     const state = e.target.value;
     setSelectedState(state);
-    setDistricts(statesWithDistricts[state] || []);
+    setSelectedDistrict(""); // Reset district when state changes
+  };
+
+  const handleDistrictChange = (e) => {
+    setSelectedDistrict(e.target.value);
   };
 
   return (
@@ -29,7 +39,7 @@ const LocationSelector = ({ selectedState, setSelectedState }) => {
         <select
           className="text-title form-control"
           id="state"
-          name="address[state]"
+          name="state"
           onChange={handleStateChange}
           value={selectedState}
         >
@@ -43,7 +53,13 @@ const LocationSelector = ({ selectedState, setSelectedState }) => {
       </div>
       <div className="col-lg-6 mb_20">
         <legend>District</legend>
-        <select className="text-title form-control" id="district" name="address[district]">
+        <select
+          className="text-title form-control"
+          id="district"
+          name="district"
+          value={selectedDistrict}
+          onChange={handleDistrictChange}
+        >
           <option value="">Select District</option>
           {districts.map((district) => (
             <option key={district} value={district}>
@@ -106,16 +122,20 @@ const Profile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setProfile({ ...profile, [name]: value });
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleFileChange = (e) => {
-    setProfile({ ...profile, image: e.target.files[0] });
+    const file = e.target.files[0];
+    setProfile((prev) => ({
+      ...prev,
+      image: file,
+    }));
   };
+  
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswords ({ ...passwords, [name]: value });
+    setPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
   const togglePasswordVisibility = (field) => {
@@ -125,28 +145,45 @@ const Profile = () => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem("token");
-    const formData = new FormData(e.target);
+  
+    const formData = new FormData();
+    for (const key in profile) {
+      formData.append(key, profile[key]);
+    }
+  
     try {
       const response = await fetch(API_ENDPOINTS.UPDATEUSERBYID, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ No Content-Type
+          Authorization: `Bearer ${token}`,
+          // Don't set Content-Type manually
         },
-        body: formData, // ✅ Correct FormData usage
+        body: formData,
       });
   
-      const data = await response.json();
-      if (data.ok) {
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Unexpected response:", text);
+        throw new Error("Server did not return JSON");
+      }
+  
+      if (response.ok) {
         toastRef.current?.showSuccess("Profile Updated");
       } else {
         toastRef.current?.showError(data.message || "Update Failed");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      toastRef.current?.showError(data.message || "Update Failed");
+      toastRef.current?.showError("Update Failed");
     }
   };
   
+  
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwords.newPassword !== passwords.confirmPassword) {
@@ -186,10 +223,11 @@ const Profile = () => {
                 <Sidebar />
               </div>
             </div>
+
             <div className="col-lg-8">
               <div className="my-account-content d-block position-relative w-100">
                 <div className="account-details w-100">
-                <form className="form-account-details" onSubmit={handleProfileSubmit}>
+                  <form className="form-account-details" onSubmit={handleProfileSubmit}>
                     <div className="account-info">
                       <h5 className="title">Profile</h5>
                       <div className="row">
@@ -256,7 +294,7 @@ const Profile = () => {
                             onChange={handleProfileChange}
                           />
                         </fieldset>
-                        <fieldset className=" col-lg-6 mb_20">
+                        <fieldset className="col-lg-6 mb_20">
                           <legend>Profile Image</legend>
                           <InputText
                             type="file"
@@ -265,17 +303,28 @@ const Profile = () => {
                             onChange={handleFileChange}
                           />
                         </fieldset>
-                        <div className="col-lg-6 mb_20">
-        <legend>District</legend>
-        <select className="text-title form-control" id="district" name="gender">
-          <option value="">Gender</option>
-          
-            <option value="">
-              Femail
-            </option>
-        </select>
-      </div>
-                        <LocationSelector selectedState={profile.state} setSelectedState={(state) => setProfile({ ...profile, state })} />
+                        <fieldset className="col-lg-6 mb_20">
+                          <legend>Gender</legend>
+                          <select
+                            className="text-title form-control"
+                            name="gender"
+                            value={profile.gender}
+                            onChange={handleProfileChange}
+                          >
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </fieldset>
+
+                        <LocationSelector
+                          selectedState={profile.state}
+                          setSelectedState={(state) => setProfile((prev) => ({ ...prev, state }))}
+                          selectedDistrict={profile.district}
+                          setSelectedDistrict={(district) => setProfile((prev) => ({ ...prev, district }))}
+                        />
+
                         <fieldset className="col-lg-6 mb_20">
                           <legend>City</legend>
                           <InputText
@@ -288,6 +337,7 @@ const Profile = () => {
                           />
                         </fieldset>
                       </div>
+
                       <div className="form-leave-comment button mb-5">
                         <button className="tf-btn btn-fill" type="submit" disabled={loading}>
                           {loading ? "Updating..." : "Update Profile"}
@@ -309,21 +359,27 @@ const Profile = () => {
                             value={passwords[field]}
                             onChange={handlePasswordChange}
                           />
-                          <span className="toggle-password" onClick={() => togglePasswordVisibility(field)}>
-                            <i className={`pi ${visibility[field] ? "pi-eye" : "pi-eye-slash"}`}></i>
+                          <span
+                            className="toggle-password"
+                            onClick={() => togglePasswordVisibility(field)}
+                          >
+                            <i className={`pi ${visibility[field] ? "pi-eye" : "pi-eye-slash"}`} />
                           </span>
                         </div>
                       ))}
-                    </div>
-                    <div className="form-leave-comment button">
-                      <button className="tf-btn btn-fill" type="submit">
-                        Update Password
-                      </button>
+
+                      <div className="form-leave-comment button mb-5">
+                        <button className="tf-btn btn-fill" type="submit">
+                          Change Password
+                        </button>
+                      </div>
                     </div>
                   </form>
+
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

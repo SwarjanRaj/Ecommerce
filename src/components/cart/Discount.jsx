@@ -12,8 +12,8 @@ const Discounts = ({ coupons, cartid, onCouponApplied, a }) => {
   const [selectedCouponCode, setSelectedCouponCode] = useState(null);
   const [totalPrice, setTotalPrice] = useState(a);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
-  
+  const [messageType, setMessageType] = useState('');
+
   useEffect(() => {
     if (coupons && coupons.length > 0) {
       setDiscounts(coupons);
@@ -33,39 +33,37 @@ const Discounts = ({ coupons, cartid, onCouponApplied, a }) => {
 
   const applyDiscount = async () => {
     if (!discountCode || applying) return;
-  
+
     const selectedCoupon = discounts.find(d => d.CouponCode === discountCode);
     if (selectedCoupon && totalPrice < selectedCoupon.MinimumAmount) {
       setMessage(`Minimum order should be ₹${selectedCoupon.MinimumAmount}`);
       setMessageType('error');
       return;
     }
-  
-    const payload = { couponCode: discountCode, cartId: cartid };
-  
+
     try {
-        setApplying(true);
-        const response = await APPLYCOUPON(payload);
-        console.log(response);
-      
-        if (response.success && response.data?.discountedAmount) {
-          onCouponApplied(response.data.discountedAmount);
-          setCouponApplied(true);
-          setMessage(response.message || 'Coupon applied successfully!');
-          setMessageType('success');
-        } else {
-          setMessage(response.message || 'Invalid coupon code.');
-          setMessageType('error');
-        }
-      } catch (error) {
-        console.error(error);
-        setMessage(error.message || 'Something went wrong.');
+      setApplying(true);
+      const response = await APPLYCOUPON({ couponCode: discountCode, cartId: cartid });
+      console.log(response);
+
+      if (response.success) {
+        const { totalPriceWithDiscount } = response.data.totalPriceWithDiscount;
+        onCouponApplied(totalPriceWithDiscount);
+        setCouponApplied(true);
+        setMessage(response.message || 'Coupon applied successfully!');
+        setMessageType('success');
+      } else {
+        setMessage(response.message || 'Invalid coupon code.');
         setMessageType('error');
-      } finally {
-        setApplying(false);
       }
-    }      
-  
+    } catch (error) {
+      console.error(error);
+      setMessage(error.message || 'Something went wrong.');
+      setMessageType('error');
+    } finally {
+      setApplying(false);
+    }
+  };
 
   useEffect(() => {
     if (discounts.length > 0) {
@@ -85,9 +83,7 @@ const Discounts = ({ coupons, cartid, onCouponApplied, a }) => {
     }
   }, [discounts]);
 
-  if (loading) {
-    return <p>Loading discounts...</p>;
-  }
+  if (loading) return <p>Loading discounts...</p>;
 
   return (
     <div className="sec-discount">
@@ -101,24 +97,16 @@ const Discounts = ({ coupons, cartid, onCouponApplied, a }) => {
               >
                 <div className="discount-top">
                   <div className="discount-off">
-                    <div className="text-caption-1">Discount</div>
-                    <span className="sale-off text-btn-uppercase">
+                    <span className="text-caption-1 pe-2">Discount</span>
+                    <span className="sale-off text-btn-uppercase bold text-danger">
                       {discount.DiscountType === 'Flat'
-                        ? `$${discount.DiscountValue}`
+                        ? `₹${discount.DiscountValue}`
                         : `${discount.DiscountValue}%`} OFF
                     </span>
-                  </div>
-                  <div className="discount-from">
-                    <p className="text-caption-1">
-                      For orders <br /> from {discount.MinimumAmount}
-                    </p>
                   </div>
                 </div>
                 <div className="discount-bot d-block">
                   <span className="text-btn-uppercase">{discount.CouponCode}</span>
-                  <button className="tf-btn" onClick={() => handleSelectCoupon(discount)}>
-                    <span className="text">Apply Code</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -127,28 +115,28 @@ const Discounts = ({ coupons, cartid, onCouponApplied, a }) => {
       </div>
 
       <div className="ip-discount-code">
-  <input
-    type="text"
-    value={discountCode}
-    onChange={handleDiscountChange}
-    placeholder="Add voucher discount"
-  />
-  <button
-    className="tf-btn"
-    onClick={applyDiscount}
-    disabled={couponApplied || applying}
-  >
-    <span className="text">
-      {applying ? "Applying..." : (couponApplied ? "Applied" : "Apply Code")}
-    </span>
-  </button>
-  
-</div>{message && (
-    <small style={{ color: messageType === 'success' ? 'green' : 'red' }}>
-      {message}
-    </small>
-  )}
+        <input
+          type="text"
+          value={discountCode}
+          onChange={handleDiscountChange}
+          placeholder="Add voucher discount"
+        />
+        <button
+          className="tf-btn"
+          onClick={applyDiscount}
+          disabled={couponApplied || applying}
+        >
+          <span className="text">
+            {applying ? "Applying..." : couponApplied ? "Applied" : "Apply Code"}
+          </span>
+        </button>
+      </div>
 
+      {message && (
+        <small style={{ color: messageType === 'success' ? 'green' : 'red' }}>
+          {message}
+        </small>
+      )}
     </div>
   );
 };
