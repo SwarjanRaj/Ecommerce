@@ -83,7 +83,7 @@ const Discounts = ({ coupons = [], cartid, onCouponApplied, onCouponDeleted, a }
 
       if (response.success) {
         const couponData = response.data;
-        onCouponApplied(couponData);
+        onCouponApplied(couponData ,  discountCode );
         setCouponApplied(true);
         setMessage(response.message || 'Coupon applied successfully!');
         setMessageType(MESSAGE_TYPES.SUCCESS);

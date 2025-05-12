@@ -15,6 +15,7 @@ const Checkout = ({ cart, customer, coupons }) => {
   const isApplicable = cart.isApplicable || false;
   const deliveryFee = !cart.isApplicable ? 0 : cart.deliveryFee;
   const [finalAmount, setFinalAmount] = useState(totalPriceWithDeliveryFee);
+  const [couponcode , setCouponcode] = useState("");
   const [couponData, setCouponData] = useState({
     couponDiscount: 0,
     deliveryFee: !isApplicable ? 0 : deliveryFee,
@@ -24,9 +25,10 @@ const Checkout = ({ cart, customer, coupons }) => {
     isApplicable: isApplicable,
   });
 
-  const handleCouponApplied = (data) => {
+  const handleCouponApplied = (data, code) => {
     if (data) {
       setFinalAmount(data.totalPriceWithDiscount);
+      setCouponcode(code)
       setCouponData(data);
     } else {
       resetCouponData();
@@ -104,7 +106,7 @@ const Checkout = ({ cart, customer, coupons }) => {
         state: formData.state,
         country: formData.country,
         pincode: formData.pincode,
-      }, formData.note || "Please deliver between 10 AM and 5 PM");
+      }, formData.note || "Please deliver between 10 AM and 5 PM" , couponcode );
 
       if (!orderResponse.success) {
         throw new Error(orderResponse.message);

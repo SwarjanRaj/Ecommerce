@@ -36,7 +36,7 @@ export const getRazorpaySettings = async () => {
 };
 
 // Create Razorpay Order
-export const createOrder = async (cartId, shippingAddress, notes = "Please deliver between 10 AM and 5 PM" , CouponCode="SPRINGSALE") => {
+export const createOrder = async (cartId, shippingAddress, notes = "Please deliver between 10 AM and 5 PM" , CouponCode) => {
   const headers = getAuthHeaders();
 
   if (!headers.Authorization) {
