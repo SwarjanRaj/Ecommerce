@@ -38,6 +38,11 @@ const HeaderMenu = ({ categories }) => {
                               </li>
                           ))}
  <li className="menu-item">
+ <Link to="/new-launch" className="item-link">New Launch</Link>
+ </li>
+
+ <li className="menu-item">
+
                               <Link to="/cart" className="item-link">Cart</Link>
                           </li>
                           <li className="menu-item">
@@ -79,6 +84,9 @@ const MobileMenu = ({ categories }) => {
                                   </Link>
                               </li>
                           ))}
+                           <li className="menu-item">
+ <Link to="/new-launch" className="item-link">New Launch</Link>
+ </li>
  <li className="nav-mb-item">
                               <Link to="/cart" className="mb-menu-link" onClick={closeMenu}>
                                   <span>Cart</span>

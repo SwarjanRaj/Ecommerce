@@ -10,17 +10,16 @@ const ProductSection = ({ product }) => {
   const token = sessionStorage.getItem("token");
   const isLoggedIn = !!token;
   const { showSuccess, showError } = useToast();
-
-
-  // Handle decrease in quantity
   const handleDecrease = () => {
     setQuantityCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1));
   };
-
-  // Handle increase in quantity
   const handleIncrease = () => {
+    console.log('v',selectedVariant)
     if (selectedVariant && quantityCount < selectedVariant.stockCount) {
       setQuantityCount((prevCount) => prevCount + 1);
+    } else {
+      setQuantityCount((prevCount) => prevCount + 1);
+
     }
   };
 
@@ -77,9 +76,12 @@ const ProductSection = ({ product }) => {
       if (existingIndex !== -1) {
         const newQuantity = existingCart[existingIndex].quantity + newItem.quantity;
         existingCart[existingIndex].quantity = Math.min(newQuantity, availablestockCount);
+
       } else {
         existingCart.push(newItem);
       }
+      showSuccess("Product Added In cart!");
+
 
       localStorage.setItem("cart", JSON.stringify(existingCart));
       console.log("Cart saved to localStorage:", existingCart);

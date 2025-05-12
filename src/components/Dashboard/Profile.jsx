@@ -1,64 +1,57 @@
 import { useState, useEffect, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import Sidebar from "./Sidebar";
-import { GetUserData } from "../../API/customer";
-import { API_ENDPOINTS } from "../../utils/api";
-import ToastMessage from "../../helper/ToastMessage";
+import { getUserData , updateUserPassword , updateUserProfile} from "../../API/customer";
+import { useToast } from "../../helper/ToastMessage";
+import statesWithDistricts from "./states.json";
 
-const statesWithDistricts = {
-  AndhraPradesh: ["Anantapur", "Chittoor", "Guntur", "Kadapa", "Krishna"],
-  Telangana: ["Adilabad", "Hyderabad", "Karimnagar", "Nizamabad", "Warangal"],
-  Maharashtra: ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad"],
-  Karnataka: ["Bangalore", "Mysore", "Mangalore", "Hubli", "Belgaum"],
-  TamilNadu: ["Chennai", "Madurai", "Coimbatore", "Salem", "Tirunelveli"],
-};
-
-const LocationSelector = ({ selectedState, setSelectedState, selectedDistrict, setSelectedDistrict }) => {
+// LocationSelector Component
+const LocationSelector = ({
+  selectedState,
+  setSelectedState,
+  selectedDistrict,
+  setSelectedDistrict,
+}) => {
   const [districts, setDistricts] = useState([]);
 
   useEffect(() => {
     if (selectedState) {
-      setDistricts(statesWithDistricts[selectedState] || []);
+      const stateData = statesWithDistricts.states.find(
+        (s) => s.state === selectedState
+      );
+      setDistricts(stateData ? stateData.districts : []);
+    } else {
+      setDistricts([]);
     }
   }, [selectedState]);
 
-  const handleStateChange = (e) => {
-    const state = e.target.value;
-    setSelectedState(state);
-    setSelectedDistrict(""); // Reset district when state changes
-  };
-
-  const handleDistrictChange = (e) => {
-    setSelectedDistrict(e.target.value);
-  };
-
   return (
     <>
-      <div className="col-lg-6 mb_20">
+      <div className="col-md-6 mb-3">
         <legend>State</legend>
         <select
-          className="text-title form-control"
-          id="state"
-          name="state"
-          onChange={handleStateChange}
+          className="form-control"
           value={selectedState}
+          onChange={(e) => {
+            setSelectedState(e.target.value);
+            setSelectedDistrict("");
+          }}
         >
           <option value="">Select State</option>
-          {Object.keys(statesWithDistricts).map((state) => (
-            <option key={state} value={state}>
-              {state}
+          {statesWithDistricts.states.map((state) => (
+            <option key={state.state} value={state.state}>
+              {state.state}
             </option>
           ))}
         </select>
       </div>
-      <div className="col-lg-6 mb_20">
+
+      <div className="col-md-6 mb-3">
         <legend>District</legend>
         <select
-          className="text-title form-control"
-          id="district"
-          name="district"
+          className="form-control"
           value={selectedDistrict}
-          onChange={handleDistrictChange}
+          onChange={(e) => setSelectedDistrict(e.target.value)}
         >
           <option value="">Select District</option>
           {districts.map((district) => (
@@ -72,7 +65,12 @@ const LocationSelector = ({ selectedState, setSelectedState, selectedDistrict, s
   );
 };
 
+// Main Profile Component
 const Profile = () => {
+  const { showSuccess, showError } = useToast();
+  const fileInputRef = useRef();
+  const [loading, setLoading] = useState(false);
+
   const [profile, setProfile] = useState({
     first_name: "",
     last_name: "",
@@ -87,32 +85,30 @@ const Profile = () => {
     district: "",
   });
 
+  const [previewImage, setPreviewImage] = useState(null);
+
   const [passwords, setPasswords] = useState({
-    password: "",
+    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-
-  const [visibility, setVisibility] = useState({
-    password: false,
-    newPassword: false,
-    confirmPassword: false,
-  });
-
-  const [loading, setLoading] = useState(false);
-  const toastRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const userData = await GetUserData();
+        const userData = await getUserData();
+        // console.log(userData);
         if (userData) {
           setProfile(userData);
+          if (userData.image_urls) {
+            console.log("kk", userData.image_urls[0]['imageUrl'])
+            setPreviewImage(userData.image_urls[0]['imageUrl']);
+          }
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        toastRef.current?.showError("Failed to fetch user data.");
+      } catch (err) {
+        console.error(err);
+        showError("Failed to fetch profile data");
       } finally {
         setLoading(false);
       }
@@ -124,262 +120,250 @@ const Profile = () => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setProfile((prev) => ({
-      ...prev,
-      image: file,
-    }));
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result);
+      reader.readAsDataURL(file);
+      setProfile((prev) => ({ ...prev, image: file }));
+    }
   };
-  
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result);
+      reader.readAsDataURL(file);
+      setProfile((prev) => ({ ...prev, image: file }));
+    }
+  };
+
+  const handleDragOver = (e) => e.preventDefault();
+  const handleClick = () => fileInputRef.current.click();
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswords((prev) => ({ ...prev, [name]: value }));
   };
-
-  const togglePasswordVisibility = (field) => {
-    setVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    const token = sessionStorage.getItem("token");
+    const res = await updateUserProfile(profile);
   
-    const formData = new FormData();
-    for (const key in profile) {
-      formData.append(key, profile[key]);
-    }
-  
-    try {
-      const response = await fetch(API_ENDPOINTS.UPDATEUSERBYID, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // Don't set Content-Type manually
-        },
-        body: formData,
-      });
-  
-      let data;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        console.error("Unexpected response:", text);
-        throw new Error("Server did not return JSON");
-      }
-  
-      if (response.ok) {
-        toastRef.current?.showSuccess("Profile Updated");
-      } else {
-        toastRef.current?.showError(data.message || "Update Failed");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toastRef.current?.showError("Update Failed");
-    }
+    if (res.success) showSuccess("Profile updated successfully");
+    else showError(res.message);
   };
   
-  
-
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      alert("New password and confirm password do not match.");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/update-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(passwords),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert("Password updated successfully!");
-      } else {
-        alert(data.message || "Failed to update password.");
-      }
-    } catch (error) {
-      console.error("Error updating password:", error);
-      alert("An error occurred while updating the password.");
-    }
+    const res = await updateUserPassword(passwords);
+  
+    if (res.success) showSuccess("Password updated");
+    else showError(res.message);
   };
 
   return (
     <section className="flat-spacing">
       <div className="container">
-        <ToastMessage ref={toastRef} />
-        <div className="my-account-wrap w-100 d-block">
+        <div className="my-account-wrap">
           <div className="row">
             <div className="col-lg-4">
-              <div className="wrap-sidebar-account d-block position-sticky w-100" style={{ top: "100px" }}>
-                <Sidebar />
-              </div>
+              <Sidebar />
             </div>
 
             <div className="col-lg-8">
               <div className="my-account-content d-block position-relative w-100">
                 <div className="account-details w-100">
-                  <form className="form-account-details" onSubmit={handleProfileSubmit}>
-                    <div className="account-info">
-                      <h5 className="title">Profile</h5>
-                      <div className="row">
-                        <fieldset className="col-lg-6 mb_20">
+                  <form onSubmit={handleProfileSubmit}>
+                    <h5 className="title">Update Profile</h5>
+                    <div className="row">
+                      {/* Profile Image */}
+                      <div className="col-md-6 mb-3 text-center">
+                        <div
+                          onClick={handleClick}
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            border: "2px dashed #ccc",
+                            borderRadius: "8px",
+                            margin: "auto",
+                            backgroundColor: "#f8f8f8",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {previewImage ? (
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <span>Click or Drag Image</span>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          style={{ display: "none" }}
+                        />
+                      </div>
+
+                      <div className="col-lg-6">
+                        <div className="col-md-12 mb-3">
                           <legend>First Name</legend>
                           <InputText
-                            type="text"
-                            placeholder="Enter First Name"
                             name="first_name"
+                            className="form-control"
                             value={profile.first_name}
                             onChange={handleProfileChange}
-                            required
                           />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
+                        </div>
+
+                        <div className="col-md-12 mb-3">
                           <legend>Last Name</legend>
                           <InputText
-                            type="text"
-                            placeholder="Enter Last Name"
                             name="last_name"
+                            className="form-control"
                             value={profile.last_name}
                             onChange={handleProfileChange}
-                            required
                           />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Email</legend>
-                          <InputText
-                            type="email"
-                            placeholder="Enter Email"
-                            name="email"
-                            value={profile.email}
-                            onChange={handleProfileChange}
-                            required
-                          />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Phone</legend>
-                          <InputText
-                            type="text"
-                            placeholder="Enter Phone Number"
-                            name="phone"
-                            value={profile.phone}
-                            onChange={handleProfileChange}
-                            required
-                          />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Age</legend>
-                          <InputText
-                            type="number"
-                            placeholder="Enter Age"
-                            name="age"
-                            value={profile.age}
-                            onChange={handleProfileChange}
-                          />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Date of Birth</legend>
-                          <InputText
-                            type="date"
-                            name="dob"
-                            value={profile.dob}
-                            onChange={handleProfileChange}
-                          />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Profile Image</legend>
-                          <InputText
-                            type="file"
-                            accept="image/*"
-                            name="image"
-                            onChange={handleFileChange}
-                          />
-                        </fieldset>
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>Gender</legend>
-                          <select
-                            className="text-title form-control"
-                            name="gender"
-                            value={profile.gender}
-                            onChange={handleProfileChange}
-                          >
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </fieldset>
-
-                        <LocationSelector
-                          selectedState={profile.state}
-                          setSelectedState={(state) => setProfile((prev) => ({ ...prev, state }))}
-                          selectedDistrict={profile.district}
-                          setSelectedDistrict={(district) => setProfile((prev) => ({ ...prev, district }))}
-                        />
-
-                        <fieldset className="col-lg-6 mb_20">
-                          <legend>City</legend>
-                          <InputText
-                            type="text"
-                            placeholder="Enter City"
-                            name="city"
-                            value={profile.city}
-                            onChange={handleProfileChange}
-                            required
-                          />
-                        </fieldset>
-                      </div>
-
-                      <div className="form-leave-comment button mb-5">
-                        <button className="tf-btn btn-fill" type="submit" disabled={loading}>
-                          {loading ? "Updating..." : "Update Profile"}
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-
-                  <form className="form-account-details form-has-password" onSubmit={handlePasswordSubmit}>
-                    <div className="account-password">
-                      <h5 className="title">Change Password</h5>
-                      {["password", "newPassword", "confirmPassword"].map((field) => (
-                        <div key={field} className="position-relative password-item mb_20">
-                          <InputText
-                            type={visibility[field] ? "text" : "password"}
-                            placeholder={field.replace(/([A-Z])/g, " $1")}
-                            className="input-password"
-                            name={field}
-                            value={passwords[field]}
-                            onChange={handlePasswordChange}
-                          />
-                          <span
-                            className="toggle-password"
-                            onClick={() => togglePasswordVisibility(field)}
-                          >
-                            <i className={`pi ${visibility[field] ? "pi-eye" : "pi-eye-slash"}`} />
-                          </span>
                         </div>
-                      ))}
+                      </div>
 
-                      <div className="form-leave-comment button mb-5">
-                        <button className="tf-btn btn-fill" type="submit">
-                          Change Password
-                        </button>
+                      <div className="col-md-6 mb-3">
+                        <legend>Email</legend>
+                        <InputText
+                          type="email"
+                          name="email"
+                          className="form-control"
+                          readOnly
+                          value={profile.email}
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+
+                      <div className="col-md-6 mb-3">
+                        <legend>Phone</legend>
+                        <InputText
+                          name="phone"
+                          className="form-control"
+                          value={profile.phone}
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+
+                      <div className="col-md-6 mb-3">
+                        <legend>Age</legend>
+                        <InputText
+                          type="number"
+                          name="age"
+                          className="form-control"
+                          value={profile.age}
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+
+                      <div className="col-md-6 mb-3">
+                        <legend>Date of Birth</legend>
+                        <InputText
+                          type="date"
+                          name="dob"
+                          className="form-control"
+                          value={profile.dob}
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+
+                      {/* Location Selector */}
+                      <LocationSelector
+                        selectedState={profile.state}
+                        setSelectedState={(val) =>
+                          setProfile((prev) => ({ ...prev, state: val }))
+                        }
+                        selectedDistrict={profile.district}
+                        setSelectedDistrict={(val) =>
+                          setProfile((prev) => ({ ...prev, district: val }))
+                        }
+                      />
+                      <div className="col-md-6 mb-3">
+                        <legend>City</legend>
+                        <InputText
+                          type="text"
+                          name="city"
+                          className="form-control"
+                          value={profile.city}
+                          onChange={handleProfileChange}
+                        />
+                      </div>
+                      {/* Submit Button */}
+                      <div className="col-md-12 text-center mt-3">
+                      <button type="submit" className="btn btn-success" disabled={loading}>
+  {loading ? "Updating..." : "Update Profile"}
+</button>
+
                       </div>
                     </div>
                   </form>
 
+                  {/* Change Password Form */}
+                  <form onSubmit={handlePasswordSubmit} className="mt-5">
+                    <h5 className="title">Change Password</h5>
+                    <div className="row">
+                      <div className="col-md-4 mb-3">
+                        <legend>Old Password</legend>
+                        <InputText
+                          type="password"
+                          name="oldPassword"
+                          className="form-control"
+                          value={passwords.oldPassword}
+                          onChange={handlePasswordChange}
+                        />
+                      </div>
+                      <div className="col-md-4 mb-3">
+                        <legend>New Password</legend>
+                        <InputText
+                          type="password"
+                          name="newPassword"
+                          className="form-control"
+                          value={passwords.newPassword}
+                          onChange={handlePasswordChange}
+                        />
+                      </div>
+                      <div className="col-md-4 mb-3">
+                        <legend>Confirm Password</legend>
+                        <InputText
+                          type="password"
+                          name="confirmPassword"
+                          className="form-control"
+                          value={passwords.confirmPassword}
+                          onChange={handlePasswordChange}
+                        />
+                      </div>
+
+                      <div className="col-md-12 text-center mt-2">
+                        <button type="submit" className="btn btn-warning">
+                          Update Password
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

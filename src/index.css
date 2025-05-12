@@ -528,10 +528,49 @@
 .bolder {
   font-weight: 600;
 }
-
+.account-orders .tf-btn {
+  font-size: 12px;
+  border-radius :4px !important;
+  padding : 4px 8px
+}
+.account-orders table thead, .account-orders table td, .account-orders table th {
+  padding: 5px 10px;
+}
 @media (max-width: 720px) {
   .preload-wrapper {
     overflow: unset !important;
     padding-right: 0 !important;
   }
 }
+legend {
+  font-weight: 600;
+}
+@media only screen and (max-width: 991px) {
+  .wrap-sidebar-account {
+      display: block;
+  }
+}.wrap-account-order.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.box-discount {
+   width: unset; 
+  }
+  .box-discount::before, .box-discount::after {
+    border: 1px solid #724724;
+  }
+  .box-discount .discount-top {
+    border: 1px solid #724724;
+    padding: 6px 9px;
+    border-bottom-style: dashed;
+  }
+  .discount-bot span.text-btn-uppercase {
+    color: green;
+  }
+  .box-discount .discount-bot {
+    border: 1px solid #724724;
+border-top: 0;
+  }
+  .box-discount .discount-bot .tf-btn {
+    border-radius: 4px !important;
+  }

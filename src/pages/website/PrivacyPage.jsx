@@ -16,7 +16,7 @@ const PrivacyPage = () => {
     return (
       <div>
         <Navbar />
-        <Innerpagebaner category={'Privacy Policy'} />
+        <Innerpagebaner category={'Privacy Policy'}  image="../assets/images/1.png"/>
 
 <PrivacyCom  />
         <Footer />

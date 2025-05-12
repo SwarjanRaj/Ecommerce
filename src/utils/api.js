@@ -8,6 +8,14 @@ const API_ENDPOINTS = {
     UPDATEUSERBYID: `${AUTH_URL}customer/id`,
     COUPON: `${AUTH_URL}coupon/apply`,
 
+    PASSWORD: `${AUTH_URL}customer/update-password`,
+
+    // ORDER
+    ORDER: `${AUTH_URL}checkout/order`,
+
+
+
+    GETCOUPON: `${BASE_URL}coupons`,
 
 
     CATEGORYLIST:`${BASE_URL}category/website/headers`,

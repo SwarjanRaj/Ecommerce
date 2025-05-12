@@ -27,12 +27,15 @@ const BestSeller = ({ title, bg, slug, products }) => {
     <section className={`flat-spacing ${bg}`}>
       <div className="container">
         <div className="row">
-          <div className="col-lg-6">
-            <div className="heading-section wow fadeInUp">
-              <h3 className="heading">{title}</h3>
-              <p className="subheading text-secondary">{title} Products</p>
-            </div>
-          </div>
+        {title !== "BESTSELLER" ? (
+  <div className="col-lg-6">
+    <div className="heading-section wow fadeInUp">
+      <h3 className="heading">{title}</h3>
+      <p className="subheading text-secondary">{title} Products</p>
+    </div>
+  </div>
+) : null}
+
           
 
          

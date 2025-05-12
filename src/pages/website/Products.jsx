@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Navbar from "../../components/Header/Navbar";
-import Footer from "../../components/Footer/Footer";
-import FooterToolbar from "../../components/Footer/FooterToolbar";
-import CartPop from "../../components/Footer/CartPop";
+
 import Innerpagebaner from "../../components/Innerpagebaner";
 import ProductSection from "../../components/Product/newpro";
 import ProductsSimialr from "../../components/Product/ProductsSimialr";
@@ -25,7 +22,6 @@ const Products = () => {
 
   return (
     <div>
-      <Navbar />
 
       {!product ? (
         <>
@@ -50,16 +46,14 @@ const Products = () => {
       ) : (
         <>
           {/* Show actual product details when data is loaded */}
-          <Innerpagebaner category={product?.productTitle || "Product Details"} />
+          <Innerpagebaner category={product?.productTitle || "Product Details"} image="../assets/images/1.png" />
           <ProductSection product={product} />
           <ProductDescriptionTabs product={product} />
           <ProductsSimialr categoryId={product?.CategoryID} />
         </>
       )}
 
-      <Footer />
-      <FooterToolbar />
-      <CartPop />
+    
     </div>
   );
 };

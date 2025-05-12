@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ import useNavigate
-import Navbar from "../../components/Header/Navbar";
-import Footer from "../../components/Footer/Footer";
-import FooterToolbar from "../../components/Footer/FooterToolbar";
-import CartPop from "../../components/Footer/CartPop";
+
 import Innerpagebaner from "../../components/Innerpagebaner";
 import Checkout from "../../components/cart/checkout";
 import { fetchcheckoutdata } from "../../API/cart";
@@ -43,12 +40,9 @@ const CheckoutPage = () => {
 
   return (
     <div>
-      <Navbar />
-      <Innerpagebaner image={"../assets/images/innerbg.png"} category="Check Out" />
+      <Innerpagebaner image="../assets/images/1.png" category="Check Out" />
       {customer && cart && <Checkout cart={cart} customer={customer} coupons={coupons} />}
-      <Footer />
-      <FooterToolbar />
-      <CartPop />
+     
     </div>
   );
 };

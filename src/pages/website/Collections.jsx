@@ -1,12 +1,7 @@
  import React from "react";
  import { useLocation } from "react-router-dom";
- 
- import Navbar from "../../components/Header/Navbar";
- import SubCategoryHome from "../../components/HomePage/SubCategoryHome";
- import BestSeller from "../../components/HomePage/BestSeller";
- import Footer from "../../components/Footer/Footer";
- import FooterToolbar from "../../components/Footer/FooterToolbar";
- import CartPop from "../../components/Footer/CartPop";
+  import SubCategoryHome from "../../components/HomePage/SubCategoryHome";
+
  import Innerpagebaner from "../../components/Innerpagebaner";
  import CategoryPage from "../../components/Category/CategoryPage";
 
@@ -17,13 +12,10 @@
  
      return (
        <div>
-         <Navbar />
-         <Innerpagebaner category={lastSegment} />
+         <Innerpagebaner category={lastSegment} image="../assets/images/1.png" />
          <SubCategoryHome />
          <CategoryPage title={lastSegment}/>
-         <Footer />
-         <FooterToolbar />
-         <CartPop />
+         
        </div>
      );
    };

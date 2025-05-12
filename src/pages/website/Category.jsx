@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
-
-import Navbar from "../../components/Header/Navbar";
 import SubCategoryHome from "../../components/HomePage/SubCategoryHome";
 import BestSeller from "../../components/HomePage/CategoryProducts";
-import Footer from "../../components/Footer/Footer";
-import FooterToolbar from "../../components/Footer/FooterToolbar";
-import CartPop from "../../components/Footer/CartPop";
+
 import Innerpagebaner from "../../components/Innerpagebaner";
 import { GlobalDataContext } from '../../contexts/GlobalDataContext';
-import { SUBCATEGORIES } from "../../API/category";
+
 const Category = () => {
   const { fetchProductsBySlug } = useContext(GlobalDataContext);
   const location = useLocation();
@@ -48,8 +44,8 @@ const Category = () => {
 
   return (
     <div>
-      <Navbar />
-      <Innerpagebaner category={slug} />
+     
+      <Innerpagebaner category={slug} image="../assets/images/1.png" />
       <SubCategoryHome slug={slug} />
 
       {loading ? (
@@ -67,9 +63,7 @@ const Category = () => {
         <></>
       )}
 
-      <Footer />
-      <FooterToolbar />
-      <CartPop />
+     
     </div>
   );
 };

@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { GetUserData } from "../../API/customer";
+import { getUserData } from "../../API/customer";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const navItems = [
   { name: "Dashboard", slug: "", icon: "pi pi-objects-column" },
   { name: "Profile", slug: "profile", icon: "pi pi-user" },
-  // { name: "Cart", slug: "cart", icon: "pi pi-cart-arrow-down" },
   { name: "Your Orders", slug: "orders", icon: "pi pi-cart-arrow-down" },
   { name: "Returns", slug: "returns", icon: "pi pi-replay" },
   { name: "Transactions", slug: "transactions", icon: "pi pi-credit-card" },
@@ -15,13 +15,14 @@ const navItems = [
 
 const Sidebar = () => {
   const [profile, setProfile] = useState(null);
-  const { pathname } = useLocation(); // Get current path
-  const navigate = useNavigate(); // Initialize navigation
-  const toastRef = useRef(null); // Reference for toast messages
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const toastRef = useRef(null);
+  const { logout } = useContext(AuthContext); // ✅ Get logout from context
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await GetUserData(); // Fetch user data
+      const userData = await getUserData();
       if (userData) {
         setProfile(userData);
       }
@@ -30,7 +31,7 @@ const Sidebar = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.clear(); // Clear session storage
+    logout(); // ✅ Call the logout from AuthContext
     toastRef.current?.showSuccess("Logged out successfully.");
     setTimeout(() => navigate("/login"), 1000);
   };

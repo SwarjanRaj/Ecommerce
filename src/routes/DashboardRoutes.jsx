@@ -11,7 +11,7 @@ const DashboardRoutes = () => {
       <Route path="/profile" element={<ProfilePage />} />
 
       <Route path="/orders" element={<Orders />} />
-      <Route path="/orders/:slug" element={<OrderSingle />} />
+      <Route path="/orders/:id" element={<OrderSingle />} />
     </Routes>
   );
 };

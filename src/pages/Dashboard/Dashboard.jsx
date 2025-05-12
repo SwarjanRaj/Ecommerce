@@ -10,7 +10,7 @@ const Dashboard = () => {
     return (
       <div>
         <Navbar />
-        <Innerpagebaner image={'../assets/images/innerbg.png'} category="Dashboard" />
+        <Innerpagebaner image={'../assets/images/1.png'} category="Dashboard" />
         <Home  />
         <Footer />
         <FooterToolbar />

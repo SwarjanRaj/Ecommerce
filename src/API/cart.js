@@ -23,6 +23,7 @@ export const CARTDATA = async () => {
     });
 
     const data = await response.json();
+    console.log(data)
     if (data.success) {
       return data
     } else {
@@ -165,14 +166,18 @@ export const CARTDATA = async () => {
 
   export const APPLYCOUPON = async (payload) => {
     const token = sessionStorage.getItem("token");
+    console.log("Token:", token);
+    console.log("Payload:", payload);
   
     try {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }), // only add if token exists
+      };
+  
       const response = await fetch(`${API_ENDPOINTS.COUPON}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify(payload),
       });
   
@@ -182,11 +187,36 @@ export const CARTDATA = async () => {
         return data;
       } else {
         return data;
-        throw new Error(data.message);
       }
     } catch (error) {
-      console.error("Failed to add to cart:", error.message);
+      console.error("Failed to apply coupon:", error.message);
       throw error;
     }
   };
   
+  
+  export const GetCoupons = async () => {
+
+    try {
+      const response = await fetch(`${API_ENDPOINTS.GETCOUPON}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log(data.data)
+
+        return data.data;
+        
+      } else {
+        throw new Error(data.message || "Failed to fetch Cart List.");
+      }
+  
+    } catch (error) {
+      console.error("Failed to fetch Cart:", error.message);
+      throw error;
+    }
+  }

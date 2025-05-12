@@ -5,7 +5,7 @@ import FooterToolbar from "../../components/Footer/FooterToolbar";
 import CartPop from "../../components/Footer/CartPop";
 import Innerpagebaner from "../../components/Innerpagebaner";
 import Profile from "../../components/Dashboard/Profile";
-import { GetUserData } from "../../API/customer";
+import { getUserData } from "../../API/customer";
 
 const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ const ProfilePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const userData = await GetUserData();
+        const userData = await getUserData();
         if (userData) {
           setProfile(userData);
         }
@@ -33,7 +33,7 @@ const ProfilePage = () => {
   return (
     <div>
       <Navbar />
-      <Innerpagebaner image={'../assets/images/innerbg.png'} category="Profile" />
+      <Innerpagebaner image={'../assets/images/1.png'} category="Profile" />
       <Profile data={profile} loading={loading} toastRef={toastRef} />
       <Footer />
       <FooterToolbar />

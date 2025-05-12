@@ -16,7 +16,7 @@ const TermsPage = () => {
     return (
       <div>
         <Navbar />
-        <Innerpagebaner category={'Terms & Conditions'} />
+        <Innerpagebaner category={'Terms & Conditions'} image="../assets/images/1.png" />
 
 <Terms  />
         <Footer />

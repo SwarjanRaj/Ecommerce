@@ -1,18 +1,54 @@
-import React, { useState, useEffect } from "react";
-import { getRazorpaySettings, createOrder, verifyPayment, decryptKey } from "../../API/payment";
+import React, { useState, useEffect  } from "react";
 import Discounts from "./Discount";
+import { getRazorpaySettings, createOrder, verifyPayment, decryptKey } from "../../API/payment";
+
 const formatPrice = (price) => (price ?? 0).toFixed(2);
 
 const Checkout = ({ cart, customer, coupons }) => {
   const address = customer.addresses?.[0] || {};
   const cartItems = cart.items || [];
-  const totalPrice = cart.totalPrice || 0;
-  const [finalAmount, setFinalAmount] = useState(totalPrice);
+  const totalPriceWithOutDiscount = cart.totalPriceWithOutDiscount || 0;
+  const totalDiscountAmount = cart.totalDiscountAmount || 0;
+  const totalPriceWithDeliveryFee = cart.totalPriceWithDeliveryFee || 0;
+  const totalPriceWithDiscount = cart.totalPriceWithDiscount || 0;
 
-  const handleCouponApplied = (newAmount) => {
-    setFinalAmount(newAmount);
+  const isApplicable = cart.isApplicable || false;
+  const deliveryFee = !cart.isApplicable ? 0 : cart.deliveryFee;
+  const [finalAmount, setFinalAmount] = useState(totalPriceWithDeliveryFee);
+  const [couponData, setCouponData] = useState({
+    couponDiscount: 0,
+    deliveryFee: !isApplicable ? 0 : deliveryFee,
+    totalDiscountAmount: totalDiscountAmount,
+    totalPriceWithDiscount: totalPriceWithDiscount,
+    totalPriceWithOutDiscount: totalPriceWithOutDiscount,
+    isApplicable: isApplicable,
+  });
+
+  const handleCouponApplied = (data) => {
+    if (data) {
+      setFinalAmount(data.totalPriceWithDiscount);
+      setCouponData(data);
+    } else {
+      resetCouponData();
+    }
   };
 
+  const handleCouponDeleted = () => {
+    resetCouponData();
+  };
+
+  const resetCouponData = () => {
+    setFinalAmount(totalPriceWithDeliveryFee);
+    setCouponData({
+      couponDiscount: 0,
+      deliveryFee: cart.deliveryFee,
+      totalDiscountAmount: cart.totalDiscountAmount,
+      totalPriceWithOutDiscount: cart.totalPriceWithOutDiscount,
+      isApplicable: cart.isApplicable,
+    });
+  };
+  console.log("cart", cart);
+  console.log('cou', couponData)
   const [formData, setFormData] = useState({
     firstName: customer.first_name || "",
     lastName: customer.last_name || "",
@@ -174,7 +210,7 @@ const Checkout = ({ cart, customer, coupons }) => {
                   <textarea name="note" placeholder="Write note..." value={formData.note} onChange={handleChange}></textarea>
 
                   <div className="text-center">
-                    <button type="submit" className="tf-btn btn-reset"> ₹ {finalAmount} Pay</button>
+                    <button type="submit" className="tf-btn btn-reset"> ₹ {finalAmount} Order</button>
                   </div>
                 </form>
               </div>
@@ -192,47 +228,104 @@ const Checkout = ({ cart, customer, coupons }) => {
               <div className="sidebar-checkout-content">
                 <h5 className="title">Shopping Cart</h5>
                 <div className="list-product">
-                  {cartItems.length === 0 ? (
-                    <p>Your cart is empty.</p>
-                  ) : (
-                    cartItems.map((item, index) => (
-                      <div className="item-product" key={item.id || index}>
-                        <a href="#" className="img-product">
-                          <img src={item.image} alt="img-product" />
-                        </a>
-                        <div className="content-box">
-                          <div className="info">
-                            <a href="#" className="name-product link text-title">{item.productName}</a>
-                            <div className="variant text-caption-1 text-secondary">
-                              <span className="size">{item.size || ''}</span>{item.size ? '/' : ''}
-                              <span className="color">{item.color?.colorName || ''}</span>
-                            </div>
-                          </div>
-                          <div className="total-price text-button">
-                            <span className="count">{item.quantity}</span> X
-                            <span className="price"> ₹{item.pricing.finalPrice}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                {cartItems.length === 0 ? (
+  <p>Your cart is empty.</p>
+) : (
+  cartItems.map((item) => (
+    <div className="item-product" key={item.PK}>
+      <a href="#" className="img-product">
+        <img src={item.image} alt="img-product" style={{ width: 80 }} />
+      </a>
+      <div className="content-box">
+        <div className="info">
+          <a href="#" className="name-product link text-title">{item.productName}</a>
+          <div className="variant text-caption-1 text-secondary">
+            <span className="size">{item.size || ''}</span>{item.size ? '/' : ''}
+            <span className="color">{item.color?.colorName || ''}</span>
+            <br></br>
+            <span
+              style={{
+                backgroundColor: item.color?.colorCode,
+                display: "inline-block",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+              }}
+            ></span>
+          </div>
+        </div>
+        <div className="total-price text-button">
+          <span className="count">{item.quantity}</span> X
+          <span className="price">
+            ₹{formatPrice(item.pricing.finalPrice)}
+          </span>
+        </div>
+        {item.pricing.baseRate !== item.pricing.finalPrice && (
+          <div className="save-amount">
+            <span style={{ fontSize: "14px", color: "red" }}>
+              Save ₹{formatPrice((item.pricing.baseRate - item.pricing.finalPrice)* item.quantity)}
+            </span>
+          </div>
+        )}
+        <div className="remove-cart d-none">
+          <span
+            className="remove pi pi-trash"
+            style={{ color: 'red' }}
+            onClick={() => onRemoveItem(item.productId, item.size)}
+          ></span>
+        </div>
+      </div>
+    </div>
+  ))
+)}
+
                 </div>
 
                 {/* Discount Section */}
-                <Discounts coupons={coupons} cartid={cart.SK} a={totalPrice} onCouponApplied={handleCouponApplied} />
-
+                <Discounts
+        coupons={coupons}
+        cartid={cart.SK}
+        onCouponApplied={handleCouponApplied}
+        onCouponDeleted={handleCouponDeleted}
+        a={totalPriceWithOutDiscount}
+      />
                 {/* Price Summary */}
                 <div className="sec-total-price">
                   <div className="bottom">
                     <h6 className="d-flex justify-content-between pb-4">
                       <span>Sub Total</span>
-                      <span className="total-price-checkout">₹{cart.totalPriceWithOutDiscount}</span>
+                      <span className="total-price-checkout">
+  ₹{formatPrice(totalPriceWithOutDiscount)}
+</span>
                     </h6>
                     <p className="d-flex justify-content-between pb-4 bolder">
                       <span>Discount</span>
                       <span className="total-price-checkout text-danger">save: ₹{cart.totalDiscountAmount}</span>
                     </p>
-                    <h5 className="d-flex justify-content-between">
+                    <p className="d-flex justify-content-between pb-4 bolder">
+                      <span>Coupon Discount</span>
+                      <span className="total-price-checkout text-danger">save:₹{couponData?.couponDiscount ?? 0} </span>
+                    </p>
+                    <p className="d-flex justify-content-between pb-4 bolder">
+  <span>Delivery Fee  <small style={{fontSize:"10px"}}>(Order Above 799 for free Delivery)</small></span> 
+  <span className="total-price-checkout">
+    {deliveryFee === 0 ? (
+      <>
+        <span className="text-muted text-decoration-line-through">₹40</span>{" "}
+        <span className="text-success fw-bold">Free</span>
+      </>
+    ) : (
+      `₹${formatPrice(deliveryFee)}`
+    )}
+  </span>
+</p>
+                    <h5 className="d-flex justify-content-between" style={{
+    background: '#d7d7d7',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    color: 'black',
+    fontWeight: 'bold'
+  }}>
                       <span>Total</span>
                       <span className="total-price-checkout">₹{formatPrice(finalAmount)}</span>
                     </h5>
