@@ -1,42 +1,43 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
-
-import OrderdetailsPage from "../../components/Dashboard/OrderdetailsPage";
-import { ORDERSINGLE } from "../../API/order";
+import { useState, useEffect, useContext } from "react";
+import ReturnTable from "../../components/Dashboard/ReturnTable";
+import { RETURNLIST } from "../../API/order";
 import { useToast } from "../../helper/ToastMessage";
 import { PageCategoryContext } from "../../contexts/PageCategoryContext";
 
-const OrderSingle = () => {
-  const { id } = useParams();
+const Returns = () => {
   const { showSuccess, showError } = useToast();
   const { setCategory } = useContext(PageCategoryContext);
+  const [orders, setOrders] = useState([]);  // better to initialize as array
+  const [loading, setLoading] = useState(false); // loading state added
 
-  const [order, setOrder] = useState("");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setCategory("Order Details");
+setCategory("Returns");
 
     const fetchData = async () => {
+
+      setLoading(true);
       try {
-        const res = await ORDERSINGLE(id);
+        const res = await RETURNLIST();
+        console.log(res)
         if (res) {
-          setOrder(res);
+          setOrders(res);
+          showSuccess("Order data fetched successfully!");
         }
       } catch (error) {
+        console.error("Error fetching order data:", error);
+          // showError("Failed to fetch order data.");
       } finally {
         setLoading(false);
       }
     };
-
-    if (id) {
-      fetchData();
-    }
-  }, [id, setCategory]);
+    fetchData();
+  }, []);
+  console.log(orders)
 
   return (
-    <div>
-      {loading ? (
+<>
+               {loading ? (
         <div
           style={{
             minHeight: "500px",
@@ -99,10 +100,12 @@ const OrderSingle = () => {
           </div>
         </div>
       ) : (
-        <OrderdetailsPage order={order} />
+                <div className="w-100">
+                <ReturnTable orders={orders} loading={loading} />
+                </div>
       )}
-    </div>
+      </>    
   );
 };
 
-export default OrderSingle;
+export default Returns;

@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "../utils/api";
 
 // 🔹 Login User API
 export const loginUser = async (credentials) => {
+  console.log(credentials)
   try {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
       method: "POST",
@@ -73,11 +74,6 @@ export const getUserData = async () => {
 
 export const updateUserProfile = async (profile) => {
   const token = sessionStorage.getItem("token");
-  const formData = new FormData();
-
-  Object.entries(profile).forEach(([key, val]) => {
-    formData.append(key, val);
-  });
 
   try {
     const res = await fetch(API_ENDPOINTS.UPDATEUSERBYID, {
@@ -85,7 +81,7 @@ export const updateUserProfile = async (profile) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
+      body: profile,
     });
 
     const data = await res.json();

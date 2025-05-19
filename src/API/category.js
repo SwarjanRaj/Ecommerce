@@ -100,3 +100,29 @@ export const CATEGORYIDPRODUCTS = async (id) => {
     throw error;
   }
 };
+
+
+export const SUBCATEGORIESPRODUCTLIST = async (slug) => {
+  try {
+    const response = await fetch(`${API_ENDPOINTS.SUBCATEGORIESPRODUCT}/${slug}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    
+    const data = await response.json();
+    console.log(data.data)
+    if (data.success) {
+      return data.data;
+      
+    } else {
+      throw new Error(data.message || "Failed to fetch Category List.");
+    }
+
+  } catch (error) {
+    console.error("Failed to fetch Category:", error.message);
+    throw error;
+  }
+};

@@ -12,10 +12,9 @@ const API_ENDPOINTS = {
 
     // ORDER
     ORDER: `${AUTH_URL}checkout/order`,
-
-
-
+    RETURN: `${AUTH_URL}checkout/request-return`,
     GETCOUPON: `${BASE_URL}coupons`,
+    RETURNORDER: `${AUTH_URL}customer/request-return`,
 
 
     CATEGORYLIST:`${BASE_URL}category/website/headers`,
@@ -28,7 +27,7 @@ const API_ENDPOINTS = {
     SUBCATEGORIESBYCATEGORY:`${BASE_URL}website/home/sub-category/`,
     BESTSELLER: `${BASE_URL}website/product/best-sellers`,
     NEWLAUNCH: `${BASE_URL}website/product/new-launch`,
-
+    SUBCATEGORIESPRODUCT:`${BASE_URL}product/website/product-by-sub-category-slug`,
 
     // Cart
     GETCART :`${AUTH_URL}cart`,

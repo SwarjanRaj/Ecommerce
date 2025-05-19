@@ -50,7 +50,7 @@ const Checkout = ({ cart, customer, coupons }) => {
     });
   };
   console.log("cart", cart);
-  console.log('cou', couponData)
+  // console.log('cou', couponData)
   const [formData, setFormData] = useState({
     firstName: customer.first_name || "",
     lastName: customer.last_name || "",
@@ -95,6 +95,7 @@ const Checkout = ({ cart, customer, coupons }) => {
         razorpaySetting.iv,
         '5d1a4553ce16144c0a62e1b1bb68b04285d5fd954f55a6a31ff5ab7ccacce7bea55273d92893b143fbaf900b3bc16a82b409264608ad19d25c76a92dd00e3595a1490e18cf50172b716cb868b22709d374046c3045cc4af4aae1eacf58e27d4ad8fd93185c773ca1bd1ba9285cfe1573d158312e635b5d3c6d1a1f164a7654c7'
       );
+         console.log(formData)
 
       console.log('🛒 Creating Razorpay Order...');
       const orderResponse = await createOrder(cart.SK, {
@@ -157,6 +158,7 @@ const Checkout = ({ cart, customer, coupons }) => {
           email: formData.email,
           contact: formData.phone,
         },
+       
         theme: {
           color: '#0D9488',
         }

@@ -4,8 +4,10 @@ import { useToast } from "../../helper/ToastMessage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { APPLYCOUPON, GetCoupons } from "../../API/cart";
+import Preloader from "../../helper/pre";
 const formatPrice = (price) => (price ?? 0).toFixed(2);
 const noop = () => {};
+
 const CartPage = ({
   cart,
   cartId,
@@ -26,7 +28,9 @@ const CartPage = ({
   const [total, setTotal] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [isApplicable, setIsApplicable] = useState(true);
-  useEffect(() => {
+
+  // Helper function to update cart totals dynamically for cases 1-4
+  const updateCartTotals = () => {
     let tempSubtotal = 0;
     let tempDiscount = 0;
     let tempTotal = 0;
@@ -61,9 +65,10 @@ const CartPage = ({
         tempSubtotal = localsubtotal;
         tempDiscount = localdes;
         tempTotal = couponData.totalPriceWithDiscount ?? tempTotal;
-        console.log("lo", tempTotal);
+        setIsApplicable(
+          couponData.isApplicable !== undefined ? couponData.isApplicable : true
+        );
       } else {
-        console.log("amount", couponData);
         tempTotal = couponData.totalPriceWithDiscount ?? tempTotal;
         tempDiscount = couponData.totalDiscountAmount ?? tempDiscount;
         setIsApplicable(
@@ -71,9 +76,11 @@ const CartPage = ({
         );
         tempSubtotal = couponData.totalPriceWithOutDiscount ?? tempSubtotal;
       }
+    } else {
+      setIsApplicable(true);
     }
 
-    // 🟡 Delivery Fee Logic
+    // Delivery Fee Logic
     const tempDeliveryFee =
       isApplicable === false ? 0 : tempTotal >= 799 ? 0 : 40;
 
@@ -81,7 +88,11 @@ const CartPage = ({
     setDiscount(tempDiscount);
     setTotal(tempTotal);
     setDeliveryFee(tempDeliveryFee);
-  }, [cartItems, amount, couponApplied, couponData, isLoggedIn]); // Re-run whenever cart or coupon changes
+  };
+
+  useEffect(() => {
+    updateCartTotals();
+  }, [cartItems, amount, couponApplied, couponData, isLoggedIn, isApplicable]);
 
   const handleCheckoutClick = async (e) => {
     e.preventDefault();
@@ -111,29 +122,132 @@ const CartPage = ({
       showError("No more stock available");
       return;
     }
-  
+
     onIncreaseQuantity(productId, size, stockCount);
+
+    // After quantity changes, recalculate totals dynamically
+    updateCartTotals();
+
+    // Also try re-applying coupon if any
     const discountCode = localStorage.getItem("discountCode");
-    console.log(discountCode);
-    
-console.log(amount)
-    await applyDiscount({
-      discountCode,
-      isLoggedIn,
-      cartId,
-      amount, 
-      onCouponApplied,
-      setMessage,
-      setMessageType,
-      setCouponApplied,
-      setApplying,
-    });
+    if (discountCode) {
+      try {
+        const payload = isLoggedIn
+          ? { couponCode: discountCode, cartId, companyName: "Astrashwa" }
+          : { couponCode: discountCode, amount, companyName: "Astrashwa" };
+
+        const response = await APPLYCOUPON(payload);
+        if (response?.success && response.data) {
+          const couponResponseData = {
+            couponDiscount: response.data.couponDiscount,
+            deliveryFee: response.data.deliveryFee,
+            isApplicable: response.data.isApplicable,
+            totalDiscountAmount: response.data.totalDiscountAmount,
+            totalPriceWithDiscount: response.data.totalPriceWithDiscount,
+            totalPriceWithOutDiscount: response.data.totalPriceWithOutDiscount,
+            couponCode: discountCode,
+          };
+          setCouponApplied(true);
+          setCouponData(couponResponseData);
+          onCouponApplied?.(couponResponseData);
+          setIsApplicable(
+            couponResponseData.isApplicable !== undefined
+              ? couponResponseData.isApplicable
+              : true
+          );
+        } else {
+          setCouponApplied(false);
+          setCouponData(null);
+          onCouponApplied?.({
+            couponDiscount: 0,
+            deliveryFee: 0,
+            isApplicable: true,
+            totalDiscountAmount: 0,
+            totalPriceWithDiscount: amount,
+            totalPriceWithOutDiscount: amount,
+          });
+          setIsApplicable(true);
+        }
+      } catch (error) {
+        setCouponApplied(false);
+        setCouponData(null);
+        onCouponApplied?.({
+          couponDiscount: 0,
+          deliveryFee: 0,
+          isApplicable: true,
+          totalDiscountAmount: 0,
+          totalPriceWithDiscount: amount,
+          totalPriceWithOutDiscount: amount,
+        });
+        setIsApplicable(true);
+      }
+    }
   };
-  
 
   const handleDecrease = (productId, size) => {
     onDecreaseQuantity(productId, size);
-    handleCouponApplied(couponData);
+
+    // Update totals and coupon state after decreasing quantity
+    updateCartTotals();
+
+    // Re-apply coupon logic if needed
+    if (couponApplied && couponData) {
+      const discountCode = localStorage.getItem("discountCode");
+      if (discountCode) {
+        try {
+          // We do not await here to prevent UI blocking, consider improving with debouncing
+          const payload = isLoggedIn
+            ? { couponCode: discountCode, cartId, companyName: "Astrashwa" }
+            : { couponCode: discountCode, amount, companyName: "Astrashwa" };
+          APPLYCOUPON(payload).then((response) => {
+            if (response?.success && response.data) {
+              const couponResponseData = {
+                couponDiscount: response.data.couponDiscount,
+                deliveryFee: response.data.deliveryFee,
+                isApplicable: response.data.isApplicable,
+                totalDiscountAmount: response.data.totalDiscountAmount,
+                totalPriceWithDiscount: response.data.totalPriceWithDiscount,
+                totalPriceWithOutDiscount:
+                  response.data.totalPriceWithOutDiscount,
+                couponCode: discountCode,
+              };
+              setCouponApplied(true);
+              setCouponData(couponResponseData);
+              onCouponApplied?.(couponResponseData);
+              setIsApplicable(
+                couponResponseData.isApplicable !== undefined
+                  ? couponResponseData.isApplicable
+                  : true
+              );
+            } else {
+              setCouponApplied(false);
+              setCouponData(null);
+              onCouponApplied?.({
+                couponDiscount: 0,
+                deliveryFee: 0,
+                isApplicable: true,
+                totalDiscountAmount: 0,
+                totalPriceWithDiscount: amount,
+                totalPriceWithOutDiscount: amount,
+              });
+              setIsApplicable(true);
+            }
+          });
+        } catch (error) {
+          setCouponApplied(false);
+          setCouponData(null);
+          onCouponApplied?.({
+            couponDiscount: 0,
+            deliveryFee: 0,
+            isApplicable: true,
+            totalDiscountAmount: 0,
+            totalPriceWithDiscount: amount,
+            totalPriceWithOutDiscount: amount,
+          });
+          setIsApplicable(true);
+        }
+      }
+    }
   };
 
   const handleCouponApplied = (coupon) => {
@@ -143,6 +257,20 @@ console.log(amount)
   };
 
   return (
+    <>
+  {cartItems.length === 0 ? (
+  <section className="flat-spacing text-center d-flex justify-content-center">
+    <div>
+      
+    <h4> <b>Your cart is empty. </b></h4>
+     <a href="/" className="tf-btn btn-fill mt-3">
+      Browse Products
+    </a>
+      <Preloader />
+   
+    </div>
+  </section>
+) : (
     <section className="flat-spacing">
       <div className="container">
         <div className="row">
@@ -162,7 +290,7 @@ console.log(amount)
                   {cartItems.map((item) => (
                     <tr key={item.PK} className="tf-cart-item file-delete">
                       <td className="tf-cart-item_product">
-                        <a href="#" className="img-box">
+                        <a href="#" className="img-box" onClick={(e)=>e.preventDefault()}>
                           <img
                             src={item.image}
                             alt="product"
@@ -238,6 +366,14 @@ console.log(amount)
                         </div>
                       </td>
                       <td className="text-center">
+                        {item.pricing.baseRate !== item.pricing.finalPrice && (
+                          <span
+                            className="me-2 text-muted text-decoration-line-through"
+                            style={{ fontSize: "14px", color: "#eee" }}
+                          >
+                            ₹{formatPrice(item.pricing.baseRate * item.quantity)}
+                          </span>
+                        )}
                         ₹{formatPrice(item.pricing.finalPrice * item.quantity)}{" "}
                         <br />
                         {item.pricing.baseRate * item.quantity >
@@ -349,6 +485,9 @@ console.log(amount)
         </div>
       </div>
     </section>
+                    )}
+
+                    </>
   );
 };
 
@@ -412,10 +551,7 @@ const Coupons = ({ amount, onCouponApplied = noop, cartId, isLoggedIn }) => {
       : { couponCode: discountCode, amount, companyName: "Astrashwa" };
     try {
       setApplying(true);
-      console.log("Applying coupon with code:", discountCode); // Debugging line
-
       const response = await APPLYCOUPON(payload);
-      console.log(response);
       if (response?.success && response.data) {
         const couponResponseData = {
           couponDiscount: response.data.couponDiscount,
@@ -424,6 +560,7 @@ const Coupons = ({ amount, onCouponApplied = noop, cartId, isLoggedIn }) => {
           totalDiscountAmount: response.data.totalDiscountAmount,
           totalPriceWithDiscount: response.data.totalPriceWithDiscount,
           totalPriceWithOutDiscount: response.data.totalPriceWithOutDiscount,
+          couponCode: discountCode,
         };
         onCouponApplied?.(couponResponseData);
         setCouponApplied(true);
@@ -475,6 +612,7 @@ const Coupons = ({ amount, onCouponApplied = noop, cartId, isLoggedIn }) => {
       totalPriceWithDiscount: amount,
       totalPriceWithOutDiscount: amount,
     });
+    localStorage.removeItem("discountCode");
   };
 
   if (loading) return <p>Loading discounts...</p>;
@@ -575,3 +713,4 @@ const Coupons = ({ amount, onCouponApplied = noop, cartId, isLoggedIn }) => {
 };
 
 export default CartPage;
+

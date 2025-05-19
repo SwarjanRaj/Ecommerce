@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 
-import OrderdetailsPage from "../../components/Dashboard/OrderdetailsPage";
-import { ORDERSINGLE } from "../../API/order";
+import ReturnDetails from "../../components/Dashboard/ReturnDetails";
+import { RETURNSINGLE } from "../../API/order";
 import { useToast } from "../../helper/ToastMessage";
 import { PageCategoryContext } from "../../contexts/PageCategoryContext";
 
-const OrderSingle = () => {
+const ReturnSingle = () => {
   const { id } = useParams();
   const { showSuccess, showError } = useToast();
   const { setCategory } = useContext(PageCategoryContext);
@@ -19,7 +19,8 @@ const OrderSingle = () => {
 
     const fetchData = async () => {
       try {
-        const res = await ORDERSINGLE(id);
+        const res = await RETURNSINGLE(id);
+        console.log(res)
         if (res) {
           setOrder(res);
         }
@@ -99,10 +100,10 @@ const OrderSingle = () => {
           </div>
         </div>
       ) : (
-        <OrderdetailsPage order={order} />
+        <ReturnDetails order={order} />
       )}
     </div>
   );
 };
 
-export default OrderSingle;
+export default ReturnSingle;

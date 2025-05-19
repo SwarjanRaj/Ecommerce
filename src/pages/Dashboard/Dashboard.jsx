@@ -1,22 +1,19 @@
-import React from "react";
-import Navbar from "../../components/Header/Navbar";
-import Footer from "../../components/Footer/Footer";
-import FooterToolbar from "../../components/Footer/FooterToolbar";
-import CartPop from "../../components/Footer/CartPop";
-import Innerpagebaner from "../../components/Innerpagebaner";
-import Profile from "../../components/Dashboard/Profile";
+import React, { useContext, useEffect } from "react";
 import Home from "../../components/Dashboard/Home";
+import { PageCategoryContext } from "../../contexts/PageCategoryContext";
+
 const Dashboard = () => {
-    return (
-      <div>
-        <Navbar />
-        <Innerpagebaner image={'../assets/images/1.png'} category="Dashboard" />
-        <Home  />
-        <Footer />
-        <FooterToolbar />
-        <CartPop />
-      </div>
-    );
-  };
-  
-  export default Dashboard;
+  const { setCategory } = useContext(PageCategoryContext);
+
+  useEffect(() => {
+    setCategory("Dashboard");
+  }, [setCategory]);
+
+  return (
+    <>
+      <Home />
+    </>
+  );
+};
+
+export default Dashboard;

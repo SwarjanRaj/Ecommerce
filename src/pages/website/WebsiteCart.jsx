@@ -8,7 +8,6 @@ import {
   DeleteCartProduct,
 } from "../../API/cart";
 import { useToast } from "../../helper/ToastMessage";
-
 const WebsiteCart = () => {
   const { showSuccess, showError } = useToast();
 

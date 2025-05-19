@@ -40,10 +40,14 @@ const Sidebar = () => {
     <div className="sidebar-account">
       <div className="account-avatar">
         <div className="image">
-          <img src="/assets/images/beauty10.jpg" alt="User Avatar" />
+<img
+  src={profile?.image_urls?.[0]?.imageUrl || "https://www.dummyimg.in/placeholder?width=200"}
+  alt={profile?.first_name || "Profile"}
+  className="max-w-10/12"
+/>
         </div>
-        <h6 className="mb_4">{profile?.first_name} {profile?.last_name}</h6>
-        <div className="body-text-1">{profile?.email}</div>
+        <h6 className="mb_4 bolder">{profile?.first_name} {profile?.last_name}</h6>
+        <p className="body-text-1">{profile?.email}</p>
       </div>
       <ul className="my-account-nav">
         {navItems.map(({ name, slug, icon }) => {

@@ -1,31 +1,14 @@
-
-import Sidebar from "./Sidebar";
+import React from "react";
 import OrderDetails from "./OrderDetails";
 
-const OrderdetailsPage = ({order  }) => {
- console.log(order)
-
+const OrderdetailsPage = ({ order }) => {
+  console.log(order); 
 
   return (
-    <section className="flat-spacing">
-      <div className="container">
-        <div className="my-account-wrap w-100 d-block">
-          <div className="row">
-            <div className="col-lg-4">
-              <div className="wrap-sidebar-account d-block position-sticky w-100" style={{ top: '100px' }}>
-                <Sidebar />
-              </div>
-            </div>
-            <div className="col-lg-8">
-              <div className="my-account-content d-block position-relative w-100">
-                {/* Pass order as a prop to OrderDetails */}
-                <OrderDetails order={order}  />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+   <>
+                {/* No need to add the sidebar here */}
+                <OrderDetails order={order} />
+   </>        
   );
 };
 

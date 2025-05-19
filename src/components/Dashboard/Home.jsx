@@ -1,28 +1,15 @@
 import { useState, useEffect } from "react";
-import { InputText } from "primereact/inputtext";
-import Sidebar from "./Sidebar";
 
 const Home = () => {
  
   return (
-    <section className="flat-spacing">
-      <div className="container">
-        <div className="my-account-wrap w-100 d-block">
-          <div className="row">
-            <div className="col-lg-4">
-              <div className="wrap-sidebar-account d-block position-sticky w-100 " style={{top:'100px'}}>
-                <Sidebar  />
-              </div>
-            </div>
-            <div className="col-lg-8">
-              <div className="my-account-content d-block position-relative w-100">
-                <img src="/assets/images/logo.png"  style={{maxWidth:"300px"}} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<>
+<div className="d-flex justify-content-center align-items-center h-100">
+
+                <img src="/assets/images/logo.png"  style={{maxWidth:"400px"}} />
+                </div>
+
+           </>   
   );
 };
 
