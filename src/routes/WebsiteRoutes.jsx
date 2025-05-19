@@ -10,7 +10,8 @@ import Register from "../pages/website/Register";
 import Collections from "../pages/website/Collections";
 import WebsiteCart from "../pages/website/WebsiteCart";
 import CheckoutPage from "../pages/website/CheckoutPage";
-
+import Forgot from "../pages/website/forgot";
+import Subcategory from "../pages/website/Subcategory";
 const WebsiteRoutes = () => {
   return (
     <Routes>
@@ -19,12 +20,16 @@ const WebsiteRoutes = () => {
         <Route path="category" element={<Category />} />
         <Route path="category/:slug" element={<Category />} />
         <Route path="new-launch" element={<BestSellerPage />} />
+        <Route path="subcategory/:slug" element={<Subcategory />} />
+
         <Route path="product/:slug" element={<Products />} />
         <Route path="collections/:slug" element={<Collections />} />
         <Route path="cart" element={<WebsiteCart />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="forgot-password" element={<Forgot />} />
+
       </Route>
     </Routes>
   );

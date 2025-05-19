@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Preloader from "../../helper/pre";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -27,7 +28,7 @@ const SubCategoryHome = ({ slug }) => {
   }, [slug]);
 
   if (loading) {
-    return <div className="text-center">Loading subcategories...</div>;
+    return <div className="text-center"><Preloader/></div>;
   }
   if(subCategories.length>0){
 
@@ -65,7 +66,7 @@ const SubCategoryHome = ({ slug }) => {
   return (
     <SwiperSlide key={index}>
       <div className="collection-circle hover-img">
-        <Link to={`/subcategory/${category.slug}`} className="img-style">
+        <Link to={`/subcategory/${category.Slug}`} className="img-style">
           <img
           style={{aspectRatio:1/1}}
             src={imageUrl}
@@ -73,7 +74,7 @@ const SubCategoryHome = ({ slug }) => {
           />
         </Link>
         <div className="collection-content text-center">
-          <Link to={`/subcategory/${category.slug}`} className="cls-title">
+          <Link to={`/subcategory/${category.Slug}`} className="cls-title">
             <h6 className="text">{category.SubCategoryName}</h6>
             <i className="icon icon-arrowUpRight"></i>
           </Link>

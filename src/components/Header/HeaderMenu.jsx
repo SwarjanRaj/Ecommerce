@@ -27,7 +27,7 @@ const HeaderMenu = ({ categories }) => {
                                           <ul className="menu-list">
                                               {category.subCategories.map((sub, idx) => (
                                                   <li key={sub.sub_id}>
-                                                      <Link to={`/category/${sub.sub_slug}`} className="menu-link-text">
+                                                      <Link to={`/subcategory/${sub.sub_slug}`} className="menu-link-text">
                                                           {sub.sub_name}
                                                       </Link>
                                                   </li>

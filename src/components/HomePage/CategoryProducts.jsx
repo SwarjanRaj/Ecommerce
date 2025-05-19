@@ -8,7 +8,6 @@ const BestSeller = ({ title, bg, slug, products }) => {
     return <div className="text-center p-4">No best sellers found.</div>;
   }
 
-  // 🆕 Manage selected images for each product using index
   const [selectedImages, setSelectedImages] = useState(
     products.reduce((acc, product, index) => {
       acc[product.pk] = product.image1;

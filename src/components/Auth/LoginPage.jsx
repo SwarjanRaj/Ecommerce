@@ -13,14 +13,29 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
+  const isValidEmail = (email) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+
+  // const isValidPassword = (password) =>
+  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/.test(password);
+
   const validateForm = () => {
     const errors = {};
+
     if (!email.trim()) {
-      errors.email = "Please enter email id *";
+      errors.email = "Email is required";
+    } else if (!isValidEmail(email)) {
+      errors.email = "Invalid email format";
     }
+
     if (!password.trim()) {
-      errors.password = "Please enter password *";
-    }
+      errors.password = "Password is required";
+    } 
+    // else if (!isValidPassword(password)) {
+    //   errors.password =
+    //     "Password must have at least 8 characters, one uppercase, one lowercase, one number and one special character";
+    // }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -74,7 +89,6 @@ const LoginPage = () => {
 
               <form onSubmit={handleSubmit} className="form-login form-has-password">
                 <div className="wrap">
-
                   {/* Email Field */}
                   <fieldset>
                     <input
@@ -85,18 +99,18 @@ const LoginPage = () => {
                         setEmail(e.target.value);
                         setFormErrors({ ...formErrors, email: "" });
                       }}
-                      className={formErrors.email ? "input-error" : ""}
+                    
+                                              className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
+
                     />
-                   
-                  </fieldset>
-                  {formErrors.email && (
-                      <small className="text-danger" style={{marginTop: '-10px'}}>{formErrors.email}</small>
+                    {formErrors.email && (
+                      <small className="text-danger  d-block text-start">{formErrors.email}</small>
                     )}
+                  </fieldset>
 
                   {/* Password Field */}
-
                   <fieldset className="position-relative password-item">
-                  <input
+                    <input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password *"
                       value={password}
@@ -104,22 +118,23 @@ const LoginPage = () => {
                         setPassword(e.target.value);
                         setFormErrors({ ...formErrors, password: "" });
                       }}
-                      className={`input-password ${formErrors.password ? "input-error" : ""}`}
-                      style={{ flex: 1 }}
+                                              className={`form-control ${formErrors.password ? "is-invalid" : ""}`}
+
+
                     />
-                    <span
+                    {/* <span
                       className="toggle-password unshow"
                       onClick={() => setShowPassword(!showPassword)}
                       style={{ cursor: "pointer", marginRight: "10px" }}
                     >
                       <i className={showPassword ? "pi pi-eye" : "pi pi-eye-slash"}></i>
-                    </span>
-                   
+                    </span> */}
+                    {formErrors.password && (
+                      <small className="text-danger d-block text-start">{formErrors.password}</small>
+                    )}
                   </fieldset>
-                  {formErrors.password && (
-                    <small className="text-danger" style={{marginTop: '-10px'}}>{formErrors.password}</small>
-                  )}
-                  <div className="mt-2">
+
+                  <div className="mt-2 text-left">
                     <Link to="/forgot-password" className="text-button link">
                       Forgot Your Password?
                     </Link>
@@ -153,20 +168,7 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Optional: Basic CSS for red borders */}
-      <style>
-        {`
-          .input-error {
-            border: 1px solid red !important;
-          }
-          .text-danger {
-            font-size: 12px;
-            text-align: left;
-            display: block;
-            margin-top: 5px;
-          }
-        `}
-      </style>
+     
     </section>
   );
 };

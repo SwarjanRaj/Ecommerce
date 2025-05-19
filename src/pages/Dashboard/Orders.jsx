@@ -1,21 +1,19 @@
-import React from "react";
-import Navbar from "../../components/Header/Navbar";
-import Footer from "../../components/Footer/Footer";
-import FooterToolbar from "../../components/Footer/FooterToolbar";
-import CartPop from "../../components/Footer/CartPop";
-import Innerpagebaner from "../../components/Innerpagebaner";
+import React, { useEffect, useContext } from "react";
 import OrderList from "../../components/Dashboard/OrderList";
-const orders = () => {
-    return (
-      <div>
-        <Navbar />
-        <Innerpagebaner image={'../assets/images/1.png'} category="Dashboard" />
-        <OrderList  />
-        <Footer />
-        <FooterToolbar />
-        <CartPop />
-      </div>
-    );
-  };
-  
-  export default orders;
+import { PageCategoryContext } from "../../contexts/PageCategoryContext";
+
+const Orders = () => {
+  const { setCategory } = useContext(PageCategoryContext);
+
+  useEffect(() => {
+    setCategory("Orders");
+  }, [setCategory]);
+
+  return (
+    <div>
+      <OrderList />
+    </div>
+  );
+};
+
+export default Orders;
