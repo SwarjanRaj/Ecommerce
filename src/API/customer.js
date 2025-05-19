@@ -88,7 +88,7 @@ export const updateUserProfile = async (profile) => {
     return { success: res.ok, message: data.message || "Profile update result" };
   } catch (err) {
     console.error(err);
-    return { success: false, message: "Failed to update profile" };
+    return { success: false, message: "Failed to update profile ok" };
   }
 };
 
