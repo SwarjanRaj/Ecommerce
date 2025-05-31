@@ -17,19 +17,18 @@ const BestSellerPage = () => {
   return (
     <div>
       <Innerpagebaner category={slug} image="../assets/images/1.png" />
-      <SubCategoryHome slug={slug} />
+      {slug !== "new-launch" && <SubCategoryHome slug={slug} />}
 
-      {loading ? (
-        <div className="text-center p-5">Loading...</div>
-      ) : products.length > 0 ? (
-        <BestSeller
-          key={slug}
-          title="NEW LAUNCH"
-          products={products}
-          slug={slug}
-          bg="bg-light"
-        />
-      ) : null}
+
+      <BestSeller
+  key={slug}
+  title="NEW LAUNCH"
+  products={products}
+  slug={slug}
+  bg="bg-light"
+  loading={loading}
+/>
+
 
       
     </div>

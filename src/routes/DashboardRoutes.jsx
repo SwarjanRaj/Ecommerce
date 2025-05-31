@@ -7,6 +7,7 @@ import Orders from "../pages/Dashboard/Orders";
 import OrderSingle from "../pages/Dashboard/OrderSingle";
 import Returns from "../pages/Dashboard/Returns";
 import ReturnSingle from "../pages/Dashboard/ReturnSingle";
+import Address from "../pages/Dashboard/Address";
 const DashboardRoutes = () => {
   return (
     <Routes>
@@ -20,6 +21,7 @@ const DashboardRoutes = () => {
         <Route path="orders/:id" element={<OrderSingle />} />
 
                 <Route path="returns/:id" element={<ReturnSingle />} />
+        <Route path="address" element={<Address />} />
 
       </Route>
     </Routes>

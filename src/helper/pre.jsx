@@ -4,7 +4,7 @@ const Preloader = () => {
   return (
     <div
       style={{
-        minHeight: "500px",
+        minHeight: "300px",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

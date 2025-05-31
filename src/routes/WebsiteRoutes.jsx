@@ -12,6 +12,9 @@ import WebsiteCart from "../pages/website/WebsiteCart";
 import CheckoutPage from "../pages/website/CheckoutPage";
 import Forgot from "../pages/website/forgot";
 import Subcategory from "../pages/website/Subcategory";
+import PaymentSuccess from "../pages/website/PaymentSuccess";
+import PaymentFailure from "../pages/website/PaymentFailure";
+
 const WebsiteRoutes = () => {
   return (
     <Routes>
@@ -29,6 +32,9 @@ const WebsiteRoutes = () => {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="forgot-password" element={<Forgot />} />
+        <Route path="payment-success" element={<PaymentSuccess />} />
+<Route path="payment-failure" element={<PaymentFailure />} />
+
 
       </Route>
     </Routes>
