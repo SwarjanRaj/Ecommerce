@@ -1,4 +1,3 @@
-// src/pages/website/Home.js
 import React, { useState, useEffect, useContext } from "react";
 import Banners from "../../components/HomePage/Banners";
 import Marquee from "../../components/HomePage/Marquee";
@@ -31,23 +30,34 @@ const Home = () => {
       {showComponents.includes("Banners") && <Banners banners={banners} />}
       {showComponents.includes("Marquee") && <Marquee />}
       {showComponents.includes("ExploreCollections") && <ExploreCollections categories={categories} />}
-      {showComponents.includes("BestSellers") && (
-        <>
-          <NewLaunch title="Best Seller" products={bestSeller} bg="bg-light" />
-          {productswithcategory.map((cat, index) =>
-            cat.products && cat.products.length > 0 ? (
+      {showComponents.includes("BestSellers") && (() => {
+        let count = 0;
+        const categorySections = productswithcategory.map((cat) => {
+          if (cat.products && cat.products.length > 0) {
+            const bg = count % 2 === 1 ? 'bg-light' : '';
+            count++;
+            return (
               <BestSeller
                 key={cat.categoryId}
                 title={cat.categoryName}
                 products={cat.products}
                 slug={cat.categorySlug}
-                bg={index % 2 === 0 ? '' : 'bg-light'}
+                bg={bg}
               />
-            ) : null
-          )}
-          <NewLaunch title="New Launch" products={newLaunch} />
-        </>
-      )}
+            );
+          }
+          return null;
+        });
+
+        return (
+          <>
+            <NewLaunch title="Best Seller" products={bestSeller} bg="bg-light" />
+            {categorySections}
+            <NewLaunch title="New Launch" products={newLaunch} />
+          </>
+        );
+      })()}
+
       {showComponents.includes("AddSection") && <AddSection />}
       {showComponents.includes("Testimonials") && <Testimonials />}
       {showComponents.includes("FreeSection") && <FreeSection />}

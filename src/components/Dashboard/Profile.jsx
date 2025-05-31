@@ -77,33 +77,33 @@ const Profile = () => {
     fetchData();
   }, []);
 
-const validatePincode = async (pincode, selectedDistrict) => {
-  if (!/^\d{6}$/.test(pincode)) {
-    showError('Pincode must be exactly 6 digits.');
-    return;
-  }
-  try {
-    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-    const data = await res.json();
-    console.log(data);
-    if (data[0].Status !== "Success") return showError("Invalid pincode.");
-    const postOffices = data[0].PostOffice;
-    const matchDistrict = postOffices.some(
-      (po) => po.District.toLowerCase() === selectedDistrict.toLowerCase()
-    );
-    if (!matchDistrict) {
-      showError("Pincode does not belong to the selected district.");
+  const validatePincode = async (pincode, selectedDistrict) => {
+    if (!/^\d{6}$/.test(pincode)) {
+      showError('Pincode must be exactly 6 digits.');
+      return;
     }
-  } catch (err) {
-    showError("Could not validate pincode. Please try again.");
-  }
-};
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+      const data = await res.json();
+      console.log(data);
+      if (data[0].Status !== "Success") return showError("Invalid pincode.");
+      const postOffices = data[0].PostOffice;
+      const matchDistrict = postOffices.some(
+        (po) => po.District.toLowerCase() === selectedDistrict.toLowerCase()
+      );
+      if (!matchDistrict) {
+        showError("Pincode does not belong to the selected district.");
+      }
+    } catch (err) {
+      showError("Could not validate pincode. Please try again.");
+    }
+  };
 
- const handleProfileChange = async (e) => {
+  const handleProfileChange = async (e) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
 
-    
+
 
     if (name === "dob") {
       const birthDate = new Date(value);
@@ -114,7 +114,7 @@ const validatePincode = async (pincode, selectedDistrict) => {
       setCalculatedAge(age > 0 ? age : "");
       setProfile(prev => ({ ...prev, age: age > 0 ? age : "" }));
     }
-    
+
   };
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -158,9 +158,9 @@ const validatePincode = async (pincode, selectedDistrict) => {
       return false;
     }
     if (!/^\d{6}$/.test(pincode)) {
-    showError("Pincode must be exactly 6 digits.");
-    return false;
-  }
+      showError("Pincode must be exactly 6 digits.");
+      return false;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[6-9]\d{9}$/;
 
@@ -262,22 +262,22 @@ const validatePincode = async (pincode, selectedDistrict) => {
             </div>
             <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} />
           </div>
-<div className="col-md-6" >
+          <div className="col-md-6" >
 
-<div className="row">
+            <div className="row">
 
 
-          <div className="col-md-12 mb-3">
-            <legend>First Name</legend>
-            <InputText name="first_name" value={profile.first_name} onChange={handleProfileChange} className="form-control" />
+              <div className="col-md-12 mb-3">
+                <legend>First Name</legend>
+                <InputText name="first_name" value={profile.first_name} onChange={handleProfileChange} className="form-control" />
+              </div>
+
+              <div className="col-md-12 mb-3">
+                <legend>Last Name</legend>
+                <InputText name="last_name" value={profile.last_name} onChange={handleProfileChange} className="form-control" />
+              </div>
+            </div>
           </div>
-
-          <div className="col-md-12 mb-3">
-            <legend>Last Name</legend>
-            <InputText name="last_name" value={profile.last_name} onChange={handleProfileChange} className="form-control" />
-          </div>
-          </div>
-</div>
           <div className="col-md-6 mb-3">
             <legend>Email</legend>
             <InputText name="email" value={profile.email} disabled onChange={handleProfileChange} className="form-control" />
@@ -308,7 +308,37 @@ const validatePincode = async (pincode, selectedDistrict) => {
             </select>
           </div>
 
-          
+
+
+
+
+          <div className="col-md-6 mb-3">
+            <legend>Pincode</legend>
+            <InputText
+              type="text"
+              name="pincode"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={profile.pincode}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d{0,6}$/.test(val)) {
+                  handleProfileChange(e);
+                }
+              }}
+              onBlur={() => {
+                if (profile.pincode.length === 6) {
+                  validatePincode(profile.pincode, selectedDistrict || profile.district);
+                }
+              }}
+              className="form-control"
+              maxLength={6}
+            />
+          </div>
+          <div className="col-md-6 mb-3">
+            <legend>City</legend>
+            <InputText name="city" value={profile.city} onChange={handleProfileChange} className="form-control" />
+          </div>
 
           <LocationSelector
             selectedState={profile.state}
@@ -316,34 +346,6 @@ const validatePincode = async (pincode, selectedDistrict) => {
             selectedDistrict={profile.district}
             setSelectedDistrict={(val) => setProfile(prev => ({ ...prev, district: val }))}
           />
-          <div className="col-md-6 mb-3">
-            <legend>City</legend>
-            <InputText name="city" value={profile.city} onChange={handleProfileChange} className="form-control" />
-          </div>
-
-          <div className="col-md-6 mb-3">
-  <legend>Pincode</legend>
-  <InputText
-    type="text"
-    name="pincode"
-    inputMode="numeric"
-    pattern="[0-9]*"
-    value={profile.pincode}
-    onChange={(e) => {
-      const val = e.target.value;
-      if (/^\d{0,6}$/.test(val)) {
-        handleProfileChange(e);
-      }
-    }}
-    onBlur={() => {
-      if (profile.pincode.length === 6) {
-        validatePincode(profile.pincode, selectedDistrict || profile.district);
-      }
-    }}
-    className="form-control"
-    maxLength={6}
-  />
-</div>
 
 
           <div className="col-md-12 text-center">
@@ -375,7 +377,7 @@ const validatePincode = async (pincode, selectedDistrict) => {
           </div>
 
           <div className="col-md-12 text-center d-lg-flex justify-content-center">
-            <button className="logout-btn" type="submit" style={{padding:"10px 20px", borderRadius:"10px"}}>
+            <button className="logout-btn" type="submit" style={{ padding: "10px 20px", borderRadius: "10px" }}>
               Update Password
             </button>
           </div>
